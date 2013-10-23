@@ -1,0 +1,69 @@
+{
+    "name": "mouf/utils.i18n.fine",
+    "description": "Fine is a PHP internationalisation package. It will help you provide applications that support several languages. FINE means: Fine is not english :). Translation is performed using PHP mapping files, but you will have a nice graphical interface in the Mouf framework to write your own translated messages.",
+    "keywords": ["i18n", "internationalisation", "fine", "mouf"],
+    "homepage": "https://github.com/thecodingmachine/utils.i18n.fine",
+    "type": "mouf-library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "David Négrier",
+            "email": "d.negrier@thecodingmachine.com",
+            "homepage": "http://mouf-php.com"
+        },
+        {
+            "name": "Marc Teyssier",
+            "email": "m.teyssier@thecodingmachine.com",
+            "homepage": "http://mouf-php.com"
+        }
+        
+    ],
+    "require": {
+    	"php": ">=5.3.0",
+    	"mouf/mouf-installer": "~2.0",
+    	"mouf/utils.i18n.translation-interface": "~4.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Mouf": "src/"
+        },
+        "files": ["src/msgFunctions.php"]
+    },
+    "minimum-stability": "dev",
+    "extra": {
+	    "mouf": {
+	    	"install": [
+		    	{
+		    		"type": "file",
+		    		"file": "src/install.php"
+		    	}
+	    	],
+			"require-admin": [
+    			"src/FineAdmin.php"
+    		],
+	    	"doc": [
+	    		{
+	    			"title": "Install",
+	    			"url": "doc/install.md"
+	    		},
+	    		{
+	    			"title": "Using FINE",
+	    			"url": "doc/using_fine.md"
+	    		},
+	    		{
+	    			"title": "Tutorial",
+	    			"url": "doc/tutorial.md"
+	    		},
+	    		{
+	    			"title": "Date functions",
+	    			"url": "doc/date_functions.md"
+	    		},
+	    		{
+	    			"title": "Currency functions",
+	    			"url": "doc/currency_functions.md"
+	    		}
+	    	]
+	    	
+	    }
+	}
+}
