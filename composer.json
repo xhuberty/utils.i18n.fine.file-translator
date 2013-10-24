@@ -19,15 +19,15 @@
         
     ],
     "require": {
-    	"php": ">=5.3.0",
+    	"php": ">=5.4.0",
     	"mouf/mouf-installer": "~2.0",
-    	"mouf/utils.i18n.translation-interface": "~4.0"
+    	"mouf/utils.i18n.translation-interface": "~4.0",
+    	"mouf/utils.i18n.common": "~4.0"
     },
     "autoload": {
         "psr-0": {
             "Mouf": "src/"
-        },
-        "files": ["src/msgFunctions.php"]
+        }
     },
     "minimum-stability": "dev",
     "extra": {
@@ -42,22 +42,6 @@
 	    		{
 	    			"title": "Install",
 	    			"url": "doc/install.md"
-	    		},
-	    		{
-	    			"title": "Using FINE",
-	    			"url": "doc/using_fine.md"
-	    		},
-	    		{
-	    			"title": "Tutorial",
-	    			"url": "doc/tutorial.md"
-	    		},
-	    		{
-	    			"title": "Date functions",
-	    			"url": "doc/date_functions.md"
-	    		},
-	    		{
-	    			"title": "Currency functions",
-	    			"url": "doc/currency_functions.md"
 	    		}
 	    	]
 	    	
