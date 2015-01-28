@@ -5,9 +5,39 @@ Fine is a PHP internationalisation package. It will help you develop application
 FINE means: Fine is not English :).
 
 File Translator is performed using PHP mapping files.
-This create one file by language supported.
+This package create one file by language supported.
 
-Installing Fine
----------------
+Dependencies
+------------
 
-Fine is a Mouf package. It means you can easily install it using Mouf installer, or simply by adding a composer dependency on your project.
+Fine comes as a *Composer* package and requires the "Mouf" framework to run.
+The first step is therefore to [install Mouf](http://www.mouf-php.com/).
+
+Once Mouf is installed, you can process to the Fine installation.
+
+Install Fine
+--------------
+
+If you want an easy installation, please add the package utils.i18n.fine.common at the same time in your configuration.
+Edit your *composer.json* file, and add a dependency on *mouf/utils.i18n.fine.file-translation.
+
+A minimal *composer.json* file might look like this:
+```
+	{
+	    "require": {
+	        "mouf/mouf": "~2.0",
+	        "mouf/utils.i18n.fine.file-translation": "4.0.*"
+	    },
+	    "autoload": {
+	        "psr-0": {
+	            "Test": "src/"
+	        }
+	    },
+	    "minimum-stability": "dev"
+	}
+```
+As explained above, Fine is a package of the Mouf framework. Mouf allows you (amoung other things) to visualy "build" your project's dependencies and instances.
+
+To install the dependency, run
+	php composer.phar install
+	

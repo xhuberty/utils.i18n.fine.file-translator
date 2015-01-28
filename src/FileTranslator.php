@@ -1,10 +1,10 @@
 <?php
 /*
- * Copyright (c) 2012 David Negrier
+ * Copyright (c) 2012-2015 Marc TEYSSIER
  * 
  * See the file LICENSE.txt for copying permission.
  */
-namespace Mouf\Utils\I18n\Fine\Translate;
+namespace Mouf\Utils\I18n\Fine\Translator;
 
 use Mouf\Validator\MoufValidatorResult;
 
@@ -14,29 +14,29 @@ use Mouf\MoufManager;
 
 use Mouf\Utils\I18n\Fine\FineMessageLanguage;
 
-use Mouf\Utils\I18n\Fine\Language\LanguageDetectionInterface;
-use Mouf\Utils\I18n\TranslationInterface;
-use Mouf\Utils\I18n\EditTranslationHelperTrait;
+use Mouf\Utils\I18n\Fine\LanguageDetectionInterface;
+use Mouf\Utils\I18n\Fine\Common\Ui\EditTranslationHelperTrait;
+use Mouf\Utils\I18n\Fine\LanguageTranslationInterface;
 
 /**
- * Used to save all translation in a php array.
+ * Used to save all translation in a file.
  * 
- * @Component
- * @author Marc Teyssier
+ * @author Marc TEYSSIER
  */
-class FineTranslator implements TranslationInterface, MoufValidatorInterface  {
-	use EditTranslationHelperTrait {EditTranslationHelperTrait::setTranslations as toto;}
+class FileTranslator implements LanguageTranslationInterface, MoufValidatorInterface  {
+	use EditTranslationHelperTrait {EditTranslationHelperTrait::setTranslations as unused;}
 	
 	/**
-	 * Detection language object
+	 * Message list
 	 * 
-	 * @var LanguageDetectionInterface
+	 * @var array
 	 */
 	private $msg = null;
 	
 	/**
 	 * The path to the directory storing the translations.
 	 * <p>The directory path should end with a "/".</p>
+	 * <p>If the path start with / or c:/ is the real path of file, otherwise, this must be start without / to root path of application.</p>
 	 * <p>Each file in this directory is a PHP file containing an array variable named $msg. The key is the code or message id, the value is translation.<br/>
 	 * Example :
 	 * </p>
@@ -48,70 +48,30 @@ class FineTranslator implements TranslationInterface, MoufValidatorInterface  {
 	 * @Compulsory
 	 * @var string
 	 */
-	public $i18nMessagePath = "resources/";
+	private $i18nMessagePath = "resources/";
 
 	/**
-	 * Set the language.
+	 * Set the language detection
 	 *
 	 * @Property
 	 * @var LanguageDetectionInterface
 	 */
-	public $language;
+	private $languageDetection;
+
+	public function __construct($i18nMessagePath = "resources/", $languageDetection = null) {
+		$this->i18nMessagePath = $i18nMessagePath;
+		$this->languageDetection = $languageDetection;
+	}
 	
 	/**
-	 * Set the language by default. It must be exist on activate language. 
-	 * 
-	 * @Property
-	 * @var string
+	 * This function return the real path set in parameter.
+	 * @return string
 	 */
-	public $defaultLanguage;
-	
-	/**
-	 * Runs the validation of the instance.
-	 * Returns a MoufValidatorResult explaining the result.
-	 *
-	 * @return MoufValidatorResult
-	 */
-	public function validateInstance() {
-		$instanceName = MoufManager::getMoufManager()->findInstanceName($this);
-			
-		if($this->defaultLanguage) {
-			if (!file_exists(ROOT_PATH.$this->i18nMessagePath."messages_".$this->defaultLanguage.".php")) {
-				return new MoufValidatorResult(MoufValidatorResult::ERROR, "<b>Fine: </b>Unable to find default translation file for instance: <code>".ROOT_PATH.$this->i18nMessagePath."messages_".$this->defaultLanguage.".php</code>.<br/>"
-						."You should create the following files:<br/>"
-						.$this->i18nMessagePath."message.php <a href='".ROOT_URL."vendor/mouf/mouf/editLabels/createMessageFile?name=".$instanceName."&selfedit=false&language=".$this->defaultLanguage."'>(create this file)</a>");
-			}
+	private function getPath() {
+		if(strpos($this->i18nMessagePath, '/') === 0 || strpos($this->i18nMessagePath, ':/') === 1) {
+			return $this->i18nMessagePath;;
 		}
-		else {
-			$this->loadAllMessages();
-			
-			// The array of messages by message, then by language:
-			// array(message_key => array(language => message))
-			$keys = $this->getAllKeys();
-			if($instanceName == 'defaultTranslationService')
-			foreach ($keys as $key) {
-				$msgs = $this->getMessageForAllLanguages($key);
-				if($instanceName == 'defaultTranslationService')
-				if (!isset($msgs['default'])) {
-					$missingDefaultKeys[$instanceName][] = $key;
-				}
-			}
-			if (empty($missingDefaultKeys)) {
-				return new MoufValidatorResult(MoufValidatorResult::SUCCESS, "<b>Fine: </b>Default translation file found in instance <code>$instanceName</code>.<br />
-																				Default translation is available for all messages.");
-			} else {
-				$html = "";
-				foreach ($missingDefaultKeys as $instanceName=>$missingKeys) {
-					$html .= "<b>Fine: </b>A default translation in '".$instanceName."' is missing for these messages: ";
-					foreach ($missingKeys as $missingDefaultKey) {
-						$html .= "<a href='".ROOT_URL."vendor/mouf/mouf/editLabels/editLabel?key=".urlencode($missingDefaultKey)."&language=default&backto=".urlencode(ROOT_URL)."mouf/&msginstancename=".urlencode($instanceName)."'>".$missingDefaultKey."</a> ";
-					}
-					$html .= "<hr/>";
-				}
-				return new MoufValidatorResult(MoufValidatorResult::WARN, $html);
-			}
-			
-		}
+		return ROOT_PATH.$this->i18nMessagePath;
 	}
 	
 	/**
@@ -120,13 +80,20 @@ class FineTranslator implements TranslationInterface, MoufValidatorInterface  {
 	 * If this message doesn't exist, it return a link to edit it.
 	 * 
 	 */
-	public function getTranslation($message, array $parameters = array()) {
-		
+	public function getTranslation($message, array $parameters = [], LanguageDetectionInterface $languageDetectionInterface = null) {
+		echo $message;
+		if(!$languageDetectionInterface) {
+			var_dump($this->languageDetection->getLanguage());
+			$lang = $this->languageDetection->getLanguage();
+		}
+		else {
+			$lang = $languageDetectionInterface->getLanguage();
+		}
 		//Load the main file
-		if($this->msg === null)
-			$this->retrieveMessages($this->language->getLanguage());
-			
-		if (isset($this->msg[$message])) {
+		if($this->msg[$lang] === null) {
+			$this->retrieveMessages($lang);
+		}
+		if (isset($this->msg[$lang][$message])) {
 			// build a replacement array with braces around the context keys
 			$replace = array();
 			foreach ($parameters as $key => $val) {
@@ -134,30 +101,10 @@ class FineTranslator implements TranslationInterface, MoufValidatorInterface  {
 			}
 			
 			// interpolate replacement values into the message and return
-			return strtr($this->msg[$message], $replace);
+			return strtr($this->msg[$lang][$message], $replace);
 		}
 		
 		return null;
-	}
-	
-	/**
-	 * Returns true if a translation is available for the $message key, false otherwise.
-	 *
-	 * @param string $message Key of the message
-	 * @return bool
-	 */
-	public function hasTranslation($message) {
-		
-		//Load the main file
-		if($this->msg === null) {
-			$this->retrieveMessages($this->language->getLanguage());
-		}
-		
-		if (isset($this->msg[$message])) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 	
 	/**
@@ -168,18 +115,39 @@ class FineTranslator implements TranslationInterface, MoufValidatorInterface  {
 	 * @param string $language Language code
 	 * @return boolean
 	 */
-	private function retrieveMessages($language = null) {
+	private function retrieveMessages($language) {
 		$this->msg = array();
+		/*
 		if($this->defaultLanguage) {
-			if (file_exists(ROOT_PATH.$this->i18nMessagePath.'messages_'.$this->defaultLanguage.'.php')){
-				$this->msg = require_once ROOT_PATH.$this->i18nMessagePath.'messages_'.$this->defaultLanguage.'.php';
+			if (file_exists($this->getPath().'messages_'.$this->defaultLanguage.'.php')){
+				$this->msg = require_once $this->getPath().'messages_'.$this->defaultLanguage.'.php';
 			}
 		}
+		*/
 		if($language) {
-			if (file_exists(ROOT_PATH.$this->i18nMessagePath.'message_'.$language.'.php')){
-				$this->msg = array_merge(require_once ROOT_PATH.$this->i18nMessagePath.'message_'.$language.'.php', $this->msg);
+			error_log('ici '.__LINE__);
+			if (file_exists($this->getPath().'messages_'.$language.'.php')){
+				error_log('exist '.__LINE__);
+				//$this->msg = array_merge(require_once $this->getPath().'message_'.$language.'.php', $this->msg);
+				$this->msg[$language] = require_once $this->getPath().'messages_'.$language.'.php';
+				error_log(var_export($this->msg, true));
 			}
 		}
+	}
+	
+	
+	private function loadAllMessages() {
+		error_log('ici '.__LINE__);
+		$files = glob($this->getPath().'messages_*.php');
+		error_log('test');
+		foreach ($files as $file) {
+			$base = basename($file);
+			$phpPos = strpos($base, '.php');
+			$language = substr($base, 9, $phpPos-9);
+			error_log('-'.$language.'-');
+			$this->retrieveMessages($language);
+		}
+		error_log('ici '.__LINE__);
 	}
 
 	/***************************/
@@ -204,7 +172,7 @@ class FineTranslator implements TranslationInterface, MoufValidatorInterface  {
 		}
 		
 		$messageLanguage = new FineMessageLanguage();
-		$messageLanguage->loadForLanguage(ROOT_PATH.$this->i18nMessagePath, $language);
+		$messageLanguage->loadForLanguage($this->getPath(), $language);
 		
 		$this->messages[$language] = $messageLanguage;
 		return $messageLanguage;
@@ -267,7 +235,7 @@ class FineTranslator implements TranslationInterface, MoufValidatorInterface  {
 	 * @return array<string>
 	 */
 	public function getLanguageList() {
-		$files = glob(ROOT_PATH.$this->i18nMessagePath.'messages*.php');
+		$files = glob($this->getPath().'messages*.php');
 		
 		$languages = array();
 		//$defaultFound = false;
