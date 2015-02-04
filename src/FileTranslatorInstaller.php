@@ -26,7 +26,7 @@ class FileTranslatorInstaller implements PackageInstallerInterface
 				$cascadingLanguageDetection = $moufManager->getInstanceDescriptor("cascadingLanguageDetection");
 			} 
 		
-			$fileTranslator = $moufManager->createInstance("Mouf\\Utils\\I18n\\Fine\\Translate\\FileTranslator");
+			$fileTranslator = $moufManager->createInstance("Mouf\\Utils\\I18n\\Fine\\Translator\\FileTranslator");
 			$fileTranslator->setName("fileTranslatorService");
 			$fileTranslator->getProperty("i18nMessagePath")->setValue("resources/");
 		

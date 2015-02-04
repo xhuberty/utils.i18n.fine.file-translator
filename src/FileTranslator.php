@@ -16,14 +16,14 @@ use Mouf\Utils\I18n\Fine\FineMessageLanguage;
 
 use Mouf\Utils\I18n\Fine\LanguageDetectionInterface;
 use Mouf\Utils\I18n\Fine\Common\Ui\EditTranslationHelperTrait;
-use Mouf\Utils\I18n\Fine\LanguageTranslationInterface;
+use Mouf\Utils\I18n\Fine\TranslatorInterface;
 
 /**
- * Used to save all translation in a file.
+ * <p>Each file in this directory is a PHP file containing an array variable named $msg. The key is the code or message id, the value is translation.<br/>Example :</p><pre class="brush:php">$msg["home.title"] = "Hello world";<br />$msg["home.text"] = "News 1, news 2 and news 3";</pre>
  * 
  * @author Marc TEYSSIER
  */
-class FileTranslator implements LanguageTranslationInterface, MoufValidatorInterface  {
+class FileTranslator implements TranslatorInterface  {
 	use EditTranslationHelperTrait {EditTranslationHelperTrait::setTranslations as unused;}
 	
 	/**
@@ -58,7 +58,12 @@ class FileTranslator implements LanguageTranslationInterface, MoufValidatorInter
 	 */
 	private $languageDetection;
 
-	public function __construct($i18nMessagePath = "resources/", $languageDetection = null) {
+	/**
+	 * 
+	 * @param string $i18nMessagePath The path to the directory storing the translations. <p>The directory path should end with a "/".</p><p>If the path start with / or c:/ is the real path of file, otherwise, this must be start without / to root path of application.</p><p>By default this is resources/</p>
+	 * @param LanguageDetectionInterface $languageDetection LanguageDetectionInterface
+	 */
+	public function __construct($i18nMessagePath = "resources/", LanguageDetectionInterface $languageDetection) {
 		$this->i18nMessagePath = $i18nMessagePath;
 		$this->languageDetection = $languageDetection;
 	}
