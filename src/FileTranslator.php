@@ -45,7 +45,6 @@ class FileTranslator implements TranslatorInterface  {
 	 * 
 	 * 
 	 * @Property
-	 * @Compulsory
 	 * @var string
 	 */
 	private $i18nMessagePath = "resources/";
@@ -120,29 +119,16 @@ class FileTranslator implements TranslatorInterface  {
 	 */
 	private function retrieveMessages($language) {
 		$this->msg = array();
-		/*
-		if($this->defaultLanguage) {
-			if (file_exists($this->getPath().'messages_'.$this->defaultLanguage.'.php')){
-				$this->msg = require_once $this->getPath().'messages_'.$this->defaultLanguage.'.php';
-			}
-		}
-		*/
 		if($language) {
-			error_log('ici '.__LINE__);
 			if (file_exists($this->getPath().'messages_'.$language.'.php')){
-				error_log('exist '.__LINE__);
-				//$this->msg = array_merge(require_once $this->getPath().'message_'.$language.'.php', $this->msg);
 				$this->msg[$language] = require_once $this->getPath().'messages_'.$language.'.php';
-				error_log(var_export($this->msg, true));
 			}
 		}
 	}
 	
 	
 	private function loadAllMessages() {
-		error_log('ici '.__LINE__);
 		$files = glob($this->getPath().'messages_*.php');
-		error_log('test');
 		foreach ($files as $file) {
 			$base = basename($file);
 			$phpPos = strpos($base, '.php');
@@ -241,7 +227,6 @@ class FileTranslator implements TranslatorInterface  {
 		$files = glob($this->getPath().'messages*.php');
 		
 		$languages = array();
-		//$defaultFound = false;
 		foreach ($files as $file) {
 			$base = basename($file);
 			$languages[] = substr($base, 9, 9 - strrpos($base, '.php'));

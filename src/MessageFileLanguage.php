@@ -6,7 +6,6 @@
  */
 namespace Mouf\Utils\I18n\Fine\Translator;
 
-use Mouf\MoufException;
 /**
  * The FineMessageLanguage class represents a PHP resource file that can be loaded / saved / modified.
  * There are many files for on language. Files are write with the start information of the key. Function used the separator ., - or _. 
@@ -41,7 +40,7 @@ class MessageFileLanguage {
 		$this->language = $language;
 
 		if(file_exists($folder."messages_".$language.".php")) {
-			$this->msg = @include($folder."messages_".$language.".php");
+			$this->msg = include($folder."messages_".$language.".php");
 		}
 	}
 
