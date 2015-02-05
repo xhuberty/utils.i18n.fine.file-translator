@@ -86,9 +86,7 @@ class FileTranslator implements TranslatorInterface  {
 	 * 
 	 */
 	public function getTranslation($message, array $parameters = [], LanguageDetectionInterface $languageDetectionInterface = null) {
-		echo $message;
 		if(!$languageDetectionInterface) {
-			var_dump($this->languageDetection->getLanguage());
 			$lang = $this->languageDetection->getLanguage();
 		}
 		else {
