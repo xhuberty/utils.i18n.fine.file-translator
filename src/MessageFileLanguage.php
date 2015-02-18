@@ -48,21 +48,22 @@ class MessageFileLanguage {
 	 * Saves the file for current language
 	 */
 	public function save() {
-//TODO si pas de message supprimer le fichier !
-		ksort($this->msg);
-		
-		$file = $this->folder."messages_".$this->language.".php";
-		
-		$old = umask(00002);
-		$fp = fopen($file, "w");
-		fwrite($fp, "<?php\n");
-		fwrite($fp, 'return ');
-		fwrite($fp, var_export($this->msg, true));
-		fwrite($fp, ";\n");
-		fwrite($fp, "?>\n");
-		
-		fclose($fp);
-		umask($old);
+		if($this->msg) {
+			ksort($this->msg);
+			
+			$file = $this->folder."messages_".$this->language.".php";
+			
+			$old = umask(00002);
+			$fp = fopen($file, "w");
+			fwrite($fp, "<?php\n");
+			fwrite($fp, 'return ');
+			fwrite($fp, var_export($this->msg, true));
+			fwrite($fp, ";\n");
+			fwrite($fp, "?>\n");
+			
+			fclose($fp);
+			umask($old);
+		}
 	}
 
 	/**
@@ -70,7 +71,9 @@ class MessageFileLanguage {
 	 * @param $language string Language to delete
 	 */
 	private function deleteFile() {
-		unlink($this->folder."messages_".$this->language.".php");
+		if(file_exists($this->folder."messages_".$this->language.".php")) {
+			unlink($this->folder."messages_".$this->language.".php");
+		}
 	}
 	
 	/**
@@ -114,6 +117,9 @@ class MessageFileLanguage {
 	public function deleteMessage($key) {
 		if(isset($this->msg[$key])) {
 			unset($this->msg[$key]);
+		}
+		if(!$this->msg) {
+			$this->deleteFile();
 		}
 	}
 	

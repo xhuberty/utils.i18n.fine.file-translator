@@ -17,13 +17,14 @@ use Mouf\Utils\I18n\Fine\FineMessageLanguage;
 use Mouf\Utils\I18n\Fine\LanguageDetectionInterface;
 use Mouf\Utils\I18n\Fine\Common\Ui\EditTranslationHelperTrait;
 use Mouf\Utils\I18n\Fine\TranslatorInterface;
+use Mouf\Utils\I18n\Fine\Common\Ui\EditTranslationInterface;
 
 /**
  * <p>Each file in this directory is a PHP file containing an array variable named $msg. The key is the code or message id, the value is translation.<br/>Example :</p><pre class="brush:php">$msg["home.title"] = "Hello world";<br />$msg["home.text"] = "News 1, news 2 and news 3";</pre>
  * 
  * @author Marc TEYSSIER
  */
-class FileTranslator implements TranslatorInterface  {
+class FileTranslator implements TranslatorInterface, EditTranslationInterface  {
 	use EditTranslationHelperTrait {EditTranslationHelperTrait::setTranslations as unused;}
 	
 	/**
@@ -58,6 +59,12 @@ class FileTranslator implements TranslatorInterface  {
 	private $languageDetection;
 
 	/**
+	 * Store the instance of language
+	 * @var array<MessageFileLanguage
+	 */
+	private $messageFile = [];
+	
+	/**
 	 * 
 	 * @param string $i18nMessagePath The path to the directory storing the translations. <p>The directory path should end with a "/".</p><p>If the path start with / or c:/ is the real path of file, otherwise, this must be start without / to root path of application.</p><p>By default this is resources/</p>
 	 * @param LanguageDetectionInterface $languageDetection LanguageDetectionInterface
@@ -76,6 +83,20 @@ class FileTranslator implements TranslatorInterface  {
 			return $this->i18nMessagePath;;
 		}
 		return ROOT_PATH.$this->i18nMessagePath;
+	}
+	
+	/**
+	 * Return the instance of the MessageFileLanguage
+	 * Each MessageFileLanguage is link to one language
+	 * 
+	 * @param string $language
+	 * @return MessageFileLanguage
+	 */
+	private function getMessageFile($language) {
+		if(!isset($this->messageFile[$language])) {
+			$this->messageFile[$language] = new MessageFileLanguage($this->getPath(), $language);
+		}
+		return $this->messageFile[$language];
 	}
 	
 	/**
@@ -148,6 +169,14 @@ class FileTranslator implements TranslatorInterface  {
 	 * @var array<string, FineMessageLanguage>
 	 */
 	private $messages = array();
+
+	public function getAllTranslationByLanguage() {
+		$languages = $this->getLanguageList();
+		foreach ($languages as $language) {
+			$this->getTranslationsForLanguage($language);
+		}
+		return json_encode($this->messages);
+	}
 	
 	/**
 	 * Return a list of all message for a language.
@@ -155,16 +184,31 @@ class FileTranslator implements TranslatorInterface  {
 	 * @param string $language Language
 	 * @return array<string, string> List with key value of translation
 	 */
-	public function getTranslationForLanguage($language) {
-		if (isset($this->messages[$language])) {
-			return $this->messages[$language];
+	public function getTranslationsForLanguage($language) {
+		if (!isset($this->messages[$language])) {
+			$messageLanguage = $this->getMessageFile($language);
+			$this->messages[$language] = $messageLanguage->getAllMessages();
+		}		
+		return $this->messages[$language];
+	}
+
+	/**
+	 * Return a list of all message for a key, by language.
+	 *
+	 * @param string $key Key of translation
+	 * @return array<string, string> List with key value of translation
+	 */
+	public function getTranslationsForKey($key) {
+		$this->getAllTranslationByLanguage();
+		$translations = [];
+		foreach ($this->messages as $language => $messages) {
+			foreach ($messages as $messageKey => $message) {
+				if($key == $messageKey) {
+					$translations[$language] = $message;
+				}
+			}
 		}
-		
-		$messageLanguage = new FineMessageLanguage();
-		$messageLanguage->loadForLanguage($this->getPath(), $language);
-		
-		$this->messages[$language] = $messageLanguage;
-		return $messageLanguage;
+		return $translations;
 	}
 	
 	/**
@@ -181,7 +225,7 @@ class FileTranslator implements TranslatorInterface  {
 			$languages = array($language);
 		}
 		foreach ($languages as $language) {
-			$messageFile = $this->getTranslationForLanguage($language);
+			$messageFile = $this->getMessageFile($language);
 			$messageFile->deleteMessage($key);
 			$messageFile->save();
 			
@@ -210,12 +254,26 @@ class FileTranslator implements TranslatorInterface  {
 	 * @param array<string, string> $messages List with key value of translation 
 	 * @param string $language Language to add translation
 	 */
-	public function setTranslations(array $messages, $language) {
-		$messageFile = $this->getMessageLanguageForLanguage($language);
+	public function setTranslationsForLanguage(array $messages, $language) {
+		$messageFile = $this->getMessageFile($language);
 		$messageFile->setMessages($messages);
 		$messageFile->save();
 
 		$this->messages[$language] = array_merge($this->messages[$language], $messages);
+	}
+
+	/**
+	 * Add or change many translations in one time
+	 *
+	 * @param array<string, string> $messages List with key value of translation
+	 * @param string $language Language to add translation
+	 */
+	public function setTranslationsForKey(array $messages, $key) {
+		foreach ($messages as $language => $value) {
+			$messageFile = $this->getMessageFile($language);
+			$messageFile->setMessage($key, $value);
+			$messageFile->save();
+		}
 	}
 	
 	/**
@@ -224,12 +282,13 @@ class FileTranslator implements TranslatorInterface  {
 	 * @return array<string>
 	 */
 	public function getLanguageList() {
-		$files = glob($this->getPath().'messages*.php');
+		$files = glob($this->getPath().'messages_*.php');
 		
+		$startAt = strlen('messages_');
 		$languages = array();
 		foreach ($files as $file) {
 			$base = basename($file);
-			$languages[] = substr($base, 9, 9 - strrpos($base, '.php'));
+			$languages[] = substr($base, $startAt, strrpos($base, '.php') - $startAt);
 		}
 		return $languages;
 	}
