@@ -147,18 +147,6 @@ class FileTranslator implements TranslatorInterface, EditTranslationInterface  {
 		}
 	}
 	
-	
-	private function loadAllMessages() {
-		$files = glob($this->getPath().'messages_*.php');
-		foreach ($files as $file) {
-			$base = basename($file);
-			$phpPos = strpos($base, '.php');
-			$language = substr($base, 9, $phpPos-9);
-			error_log('-'.$language.'-');
-			$this->retrieveMessages($language);
-		}
-		error_log('ici '.__LINE__);
-	}
 
 	/***************************/
 	/****** Edition mode *******/
@@ -241,7 +229,7 @@ class FileTranslator implements TranslatorInterface, EditTranslationInterface  {
 	 * @param string $language Language to add translation
 	 */
 	public function setTranslation($key, $value, $language) {
-		$messageFile = $this->getTranslationForLanguage($language);
+		$messageFile = $this->getMessageFile($language);
 		$messageFile->setMessage($key, $value);
 		$messageFile->save();
 
@@ -266,7 +254,7 @@ class FileTranslator implements TranslatorInterface, EditTranslationInterface  {
 	 * Add or change many translations in one time
 	 *
 	 * @param array<string, string> $messages List with key value of translation
-	 * @param string $language Language to add translation
+	 * @param string $key Key to add translation
 	 */
 	public function setTranslationsForKey(array $messages, $key) {
 		foreach ($messages as $language => $value) {
