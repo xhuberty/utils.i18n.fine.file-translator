@@ -32,8 +32,8 @@ class MessageFileLanguage {
 	
 	/**
 	 * Loads all message for a language
-	 * @var $folder The path to the folder to be loaded
-	 * @var $language Language of messages loaded
+	 * @param string $folder
+	 * @param string $language
 	 */
 	public function __construct($folder, $language) {
 		$this->folder = $folder;
@@ -131,5 +131,3 @@ class MessageFileLanguage {
 		return $this->msg;
 	}
 }
-
-?>

@@ -17,9 +17,7 @@ class FileTranslatorInstaller implements PackageInstallerInterface
     public static function install(MoufManager $moufManager)
     {
 		//FineFileTranslatorService
-		if ($moufManager->instanceExists("fileTranslatorService")) {
-			$fileTranslator = $moufManager->getInstanceDescriptor("fileTranslatorService");
-		} else {
+		if (!$moufManager->instanceExists("fileTranslatorService")) {
 			$cascadingLanguageDetection = null;
 			if($moufManager->instanceExists('cascadingLanguageDetection')) {
 				$cascadingLanguageDetection = $moufManager->getInstanceDescriptor("cascadingLanguageDetection");
