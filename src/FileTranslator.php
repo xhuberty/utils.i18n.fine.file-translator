@@ -25,7 +25,7 @@ use Mouf\Utils\I18n\Fine\Common\Ui\EditTranslationInterface;
  * @author Marc TEYSSIER
  */
 class FileTranslator implements TranslatorInterface, EditTranslationInterface  {
-	use EditTranslationHelperTrait {EditTranslationHelperTrait::setTranslations as unused;}
+	use EditTranslationHelperTrait;
 	
 	/**
 	 * Message list
