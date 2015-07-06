@@ -27,13 +27,7 @@
     "minimum-stability": "dev",
     "extra": {
 	    "mouf": {
-	    	"install": [
-                {
-	                "type": "class",
-	                "class": "Mouf\\Utils\\I18n\\Fine\\Translator\\FileTranslatorInstaller",
-	                "description": "This installer will create a file translator added on the defaulTranslationService if is created and bind it on the LanguageDetection"
-                }
-	    	]
+
 	    }
 	}
 }
