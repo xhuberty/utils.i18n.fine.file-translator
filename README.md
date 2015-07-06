@@ -28,7 +28,7 @@ A minimal *composer.json* file might look like this:
 	{
 	    "require": {
 	        "mouf/mouf": "~2.0",
-	        "mouf/utils.i18n.fine.file-translation": "4.0.*"
+	        "mouf/utils.i18n.fine.file-translator": "4.0.*"
 	    },
 	    "autoload": {
 	        "psr-0": {
